@@ -2,53 +2,94 @@
 
 **📧 Send this to learners BEFORE the session to ensure they're ready!**
 
-## 🎯 What You Need to Prepare
+## System Requirements
 
-### 1. Python 3.8+ Installation
+### For macOS Users
+- **Operating System**: macOS 10.14 (Mojave) or later
+- **Python**: Python 3.8 - 3.13 (recommended: Python 3.11 or 3.12)
+- **Memory**: Minimum 4GB RAM (8GB recommended)
+- **Storage**: At least 2GB free space
+- **Internet**: Stable internet connection for OpenAI API calls
 
-**Windows:**
-1. Go to [python.org/downloads](https://www.python.org/downloads/)
-2. Download Python 3.8+ (latest recommended)
-3. **IMPORTANT**: Check "Add Python to PATH" during installation
-4. Test: Open Command Prompt and type `python --version`
+### For Windows Users
+- **Operating System**: Windows 10 or Windows 11
+- **Python**: Python 3.8 - 3.13 (recommended: Python 3.11 or 3.12)
+- **Memory**: Minimum 4GB RAM (8GB recommended)
+- **Storage**: At least 2GB free space
+- **Internet**: Stable internet connection for OpenAI API calls
 
-**macOS:**
+### For Linux Users
+- **Operating System**: Ubuntu 18.04+ / CentOS 7+ / Debian 9+
+- **Python**: Python 3.8 - 3.13 (recommended: Python 3.11 or 3.12)
+- **Memory**: Minimum 4GB RAM (8GB recommended)
+- **Storage**: At least 2GB free space
+- **Internet**: Stable internet connection for OpenAI API calls
+
+## Python Installation
+
+### macOS
 ```bash
-# Option 1: Download from python.org (recommended for beginners)
-# Go to python.org/downloads and download the installer
+# Using Homebrew (recommended)
+brew install python@3.11
 
-# Option 2: Using Homebrew (if you have it)
-brew install python
+# Or download from python.org
+# Visit: https://www.python.org/downloads/macos/
 ```
-Test: Open Terminal and type `python3 --version`
 
-**Linux (Ubuntu/Debian):**
+### Windows
+```bash
+# Download from python.org (recommended)
+# Visit: https://www.python.org/downloads/windows/
+# Make sure to check "Add Python to PATH" during installation
+
+# Or using winget
+winget install Python.Python.3.11
+```
+
+### Linux (Ubuntu/Debian)
 ```bash
 sudo apt update
 sudo apt install python3 python3-pip python3-venv
 ```
 
-**Linux (CentOS/RHEL):**
+### Linux (CentOS/RHEL)
 ```bash
 sudo yum install python3 python3-pip
 # or for newer versions: sudo dnf install python3 python3-pip
 ```
-Test: Type `python3 --version`
 
-### 2. Git Installation
+## Required Python Packages (Exact Versions)
 
-**Windows:**
+The following packages will be automatically installed when you run `pip install -r requirements.txt`:
+
+### Core Dependencies
+- **streamlit>=2.14.0** - Web application framework
+- **openai>=2.14.0** - OpenAI API client
+- **python-dotenv==1.0.0** - Environment variable management
+- **pandas** - Data manipulation and analysis
+
+### Complete Package List
+```
+streamlit>=2.14.0
+openai>=2.14.0
+python-dotenv==1.0.0
+pandas
+```
+
+## Git Installation
+
+### Windows
 - Download from [git-scm.com](https://git-scm.com/download/win)
 - Install with default settings
 
-**macOS:**
+### macOS
 ```bash
 # Option 1: Download from git-scm.com
 # Option 2: Install Xcode Command Line Tools
 xcode-select --install
 ```
 
-**Linux:**
+### Linux
 ```bash
 # Ubuntu/Debian
 sudo apt install git
@@ -57,102 +98,118 @@ sudo apt install git
 sudo yum install git
 ```
 
-### 3. OpenAI API Account & Key
+## OpenAI API Requirements
 
-**CRITICAL - Do this before the session:**
+### API Key Setup
+1. **Create OpenAI Account**: Visit [OpenAI Platform](https://platform.openai.com)
+2. **Add Billing Information**: Required for API access
+3. **Generate API Key**: Go to API Keys section
+4. **Minimum Credit**: $5-10 recommended for testing
 
-1. **Create Account**: Go to [platform.openai.com](https://platform.openai.com)
-2. **Sign up** or log in
-3. **Add Payment Method**: Go to Billing → Add payment method
-4. **Generate API Key**: 
-   - Go to API Keys section
-   - Click "Create new secret key"
-   - **COPY AND SAVE IT SECURELY** (you won't see it again!)
-   - Format looks like: `sk-proj-...` (long string)
+### API Usage Costs (Approximate)
+- **GPT-3.5-Turbo**: ~$0.002 per 1K tokens
+- **Typical Session**: $0.10 - $0.50 for extensive testing
+- **Monthly Usage**: $5-20 for regular development work
 
-**💰 Cost**: Minimal usage (~$0.50-2.00 for the entire project)
+## Pre-Installation Checklist
 
-### 4. Code Editor (Optional but Recommended)
-
-Choose one:
-- **VS Code**: [code.visualstudio.com](https://code.visualstudio.com) (recommended)
-- **PyCharm Community**: [jetbrains.com/pycharm](https://www.jetbrains.com/pycharm/)
-- Any text editor you prefer
-
-## ✅ Pre-Session Checklist
-
-**Complete these BEFORE the session:**
-
-- [ ] Python 3.8+ installed and working (`python --version` or `python3 --version`)
-- [ ] Git installed and working (`git --version`)
-- [ ] OpenAI account created
+### Before Starting
+- [ ] Python 3.8+ installed and accessible via command line
+- [ ] pip package manager working
+- [ ] Git installed (for cloning repository)
+- [ ] OpenAI account created with billing enabled
 - [ ] OpenAI API key generated and saved securely
-- [ ] Payment method added to OpenAI account
-- [ ] Code editor installed (optional)
 - [ ] Stable internet connection
+- [ ] Text editor (VS Code, Sublime Text, etc.)
 
-## 🧪 Test Your Setup
+## Verification Commands
 
-**Run these commands to verify everything works:**
-
+### macOS/Linux
 ```bash
-# Test Python
-python --version
-# or on Mac/Linux:
+# Check Python version
 python3 --version
 
-# Test pip
-pip --version
-# or:
+# Check pip
 pip3 --version
 
-# Test Git
+# Check Git
 git --version
-
-# Test virtual environment creation
-python -m venv test_env
-# Clean up
-rmdir /s test_env  # Windows
-rm -rf test_env    # Mac/Linux
 ```
 
-## 🚨 Common Issues & Quick Fixes
+### Windows
+```bash
+# Check Python version
+python --version
 
-**"Python not found":**
-- Windows: Reinstall Python with "Add to PATH" checked
-- Mac/Linux: Use `python3` instead of `python`
+# Check pip
+pip --version
 
-**"Permission denied":**
-- Windows: Run Command Prompt as Administrator
-- Mac/Linux: Use `sudo` for system installations
+# Check Git
+git --version
+```
 
-**OpenAI API Key Issues:**
-- Make sure you've added a payment method
-- API key should start with `sk-proj-` or `sk-`
-- Keep it secure - never share it!
+## Common Installation Issues & Solutions
 
-## 📱 What to Bring to the Session
+### macOS
+- **Issue**: `command not found: python3`
+- **Solution**: Install Python via Homebrew or python.org
+
+- **Issue**: Permission denied during pip install
+- **Solution**: Use virtual environment (recommended) or `pip3 install --user`
+
+### Windows
+- **Issue**: `'python' is not recognized`
+- **Solution**: Add Python to PATH during installation or manually add to environment variables
+
+- **Issue**: Long path names causing issues
+- **Solution**: Enable long path support in Windows or use shorter directory names
+
+### Both Platforms
+- **Issue**: Package compilation errors
+- **Solution**: Ensure you have the latest pip: `pip install --upgrade pip`
+
+- **Issue**: OpenAI API errors
+- **Solution**: Verify API key and billing setup
+
+## Recommended Development Environment
+
+### Code Editors
+- **VS Code** (recommended) - Free, excellent Python support
+- **PyCharm** - Professional Python IDE
+- **Sublime Text** - Lightweight and fast
+- **Vim/Nano** - For terminal-based editing
+
+### Terminal/Command Line
+- **macOS**: Terminal.app or iTerm2
+- **Windows**: Command Prompt, PowerShell, or Windows Terminal
+- **Linux**: Terminal (built-in)
+
+## 🎯 What to Bring to the Session
 
 1. **Your OpenAI API Key** (saved securely)
 2. **Laptop** with all software installed
 3. **Stable internet connection**
 4. **Enthusiasm to learn!** 🚀
 
-## ❓ Need Help?
+## Support & Troubleshooting
 
-If you encounter issues during setup:
-1. Try the common fixes above
-2. Search for the specific error message online
-3. Ask for help in our discussion forum
-4. Come to the session - we'll help you get set up!
+If you encounter issues:
+1. Check the main README.md troubleshooting section
+2. Verify all prerequisites are met
+3. Ensure virtual environment is activated
+4. Check OpenAI API key and billing status
+5. Try reinstalling packages: `pip install -r requirements.txt --force-reinstall`
 
 ## 🎯 Session Day
 
 On the day of the session, we'll:
-1. Verify your setup quickly
+1. Verify your setup quickly using `python verify_setup.py`
 2. Clone the project repository
 3. Set up the virtual environment
 4. Configure your API key
 5. Run the Banking Customer Support AI Agent!
 
 **You're going to build an amazing multi-agent AI system! 🤖✨**
+
+---
+*Note: These requirements were tested and confirmed working as of December 2024. Using different versions may cause compatibility issues.*
