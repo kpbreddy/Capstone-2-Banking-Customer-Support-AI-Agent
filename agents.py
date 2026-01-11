@@ -68,17 +68,20 @@ class ClassifierAgent:
         if not client:
             raise Exception("OpenAI API key is required for classification")
             
-        prompt = f"""You are a banking customer service classifier. Classify this message into EXACTLY ONE category:
+        prompt = f"""You are a banking customer service classifier. Classify this message into EXACTLY ONE category based on PRIMARY INTENT:
 
 POSITIVE_FEEDBACK: Customer is happy, satisfied, thanking, praising, or expressing gratitude
-NEGATIVE_FEEDBACK: Customer is complaining, unhappy, reporting problems, or expressing dissatisfaction  
-QUERY: Customer is asking about ticket status, requesting information, or checking on something
+NEGATIVE_FEEDBACK: Customer is reporting NEW problems, issues, or complaints that need a support ticket
+QUERY: Customer is asking about existing ticket status, requesting information, or checking on something (even if frustrated)
+
+IMPORTANT: If message contains a ticket number or asks about ticket status, classify as QUERY regardless of tone.
 
 Examples:
 - "Thanks for helping me" → POSITIVE_FEEDBACK
-- "I hate your app, it crashes" → NEGATIVE_FEEDBACK  
+- "My card is broken and not working" → NEGATIVE_FEEDBACK  
 - "What's the status of ticket 123?" → QUERY
-- "It is always best experience" → POSITIVE_FEEDBACK
+- "Why is ticket 456 still unresolved? I'm frustrated!" → QUERY
+- "All my tickets are always unresolved, what about 789?" → QUERY
 
 Message: "{message}"
 
@@ -149,19 +152,82 @@ class FeedbackHandlerAgent:
 class QueryHandlerAgent:
     def __init__(self, db_manager: DatabaseManager):
         self.db_manager = db_manager
+        self.client = None
     
-    def handle_query(self, message: str) -> str:
+    def _get_openai_client(self):
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not self.client and api_key and api_key.strip() != "":
+            try:
+                import openai
+                self.client = openai.OpenAI(api_key=api_key)
+                return self.client
+            except Exception as e:
+                print(f"❌ Failed to create OpenAI client: {e}")
+                self.client = None
+        return self.client
+    
+    def get_ticket_details(self, ticket_id: str) -> Dict:
+        conn = sqlite3.connect(self.db_manager.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT status, description, created_at FROM support_tickets WHERE ticket_id = ?", (ticket_id,))
+        result = cursor.fetchone()
+        conn.close()
+        
+        if result:
+            return {
+                "status": result[0],
+                "description": result[1],
+                "created_at": result[2]
+            }
+        return None
+    
+    def handle_query(self, message: str, customer_name: str = "Customer") -> str:
         ticket_match = re.search(r'#?(\d{6})', message)
         if not ticket_match:
-            return "Please provide a valid 6-digit ticket number."
+            return "Please provide a valid 6-digit ticket number so I can help you better."
         
         ticket_id = ticket_match.group(1)
-        status = self.db_manager.get_ticket_status(ticket_id)
+        ticket_details = self.get_ticket_details(ticket_id)
         
-        if status:
-            return f"Your ticket #{ticket_id} is currently marked as: {status}."
-        else:
-            return f"Ticket #{ticket_id} not found in our system."
+        if not ticket_details:
+            return f"I couldn't find ticket #{ticket_id} in our system. Please double-check the ticket number or contact support if you need assistance."
+        
+        # Use OpenAI to generate intelligent response
+        client = self._get_openai_client()
+        if client:
+            try:
+                prompt = f"""You are a helpful banking customer service agent. A customer named {customer_name} is asking about their support ticket.
+
+Ticket Details:
+- Ticket ID: #{ticket_id}
+- Status: {ticket_details['status']}
+- Original Issue: {ticket_details['description']}
+- Created: {ticket_details['created_at']}
+
+Customer Query: {message}
+
+Provide a helpful, empathetic response that:
+1. Acknowledges their concern
+2. Explains the current status clearly
+3. Shows understanding of their original issue
+4. Offers next steps or timeline if appropriate
+5. Maintains a professional but friendly tone
+
+Keep response under 100 words."""
+
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=150,
+                    temperature=0.7
+                )
+                return response.choices[0].message.content.strip()
+            
+            except Exception as e:
+                print(f"❌ OpenAI API error: {e}")
+        
+        # Fallback response if OpenAI fails
+        return f"Hi {customer_name}, your ticket #{ticket_id} regarding '{ticket_details['description']}' is currently {ticket_details['status'].lower()}. Our team is working on resolving this issue and will update you soon."
 
 class MultiAgentSystem:
     def __init__(self):
@@ -183,7 +249,7 @@ class MultiAgentSystem:
             response = self.feedback_handler.handle_negative(message)
             agent_used = "Feedback Handler (Negative)"
         elif classification == "query":
-            response = self.query_handler.handle_query(message)
+            response = self.query_handler.handle_query(message, customer_name)
             agent_used = "Query Handler"
         else:
             response = "I'm sorry, I couldn't understand your message. Please try again."
